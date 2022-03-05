@@ -3,8 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"test-go/services"
-	"test-go/slots"
+	"slot-golang/services"
+	"slot-golang/slots"
 
 	"github.com/gofiber/fiber/v2"
 )

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"test-go/handlers"
-	"test-go/middlewares"
+	"slot-golang/handlers"
+	"slot-golang/middlewares"
 
 	"github.com/gofiber/fiber/v2"
 )

@@ -1,4 +1,4 @@
-module test-go
+module slot-golang
 
 go 1.17
 

@@ -1,6 +1,6 @@
 package slots
 
-import "test-go/utils"
+import "slot-golang/utils"
 
 type SlotV1Result struct {
 	BetAmount float32 `json:"betAmount"`
