@@ -6,6 +6,7 @@ import (
 )
 
 const N_REELS = 3
+const N_SYMBOLS_PER_REEL = 3
 
 type SlotV1Result struct {
 	BetAmount     float32       `json:"betAmount"`
@@ -14,7 +15,7 @@ type SlotV1Result struct {
 	Reels         [N_REELS]Reel `json:"reel"`
 }
 
-type Reel [3]int
+type Reel [N_SYMBOLS_PER_REEL]int
 
 type Symbol struct {
 	Symbol     int
@@ -23,12 +24,12 @@ type Symbol struct {
 }
 
 var SymbolList = []Symbol{
-	{Symbol: 1, Chance: 0.10, Multiplier: 0.20},
-	{Symbol: 2, Chance: 0.10, Multiplier: 0.50},
-	{Symbol: 3, Chance: 0.10, Multiplier: 0.75},
-	{Symbol: 4, Chance: 0.10, Multiplier: 1.00},
+	{Symbol: 1, Chance: 0.30, Multiplier: 0.20},
+	{Symbol: 2, Chance: 0.30, Multiplier: 0.50},
+	{Symbol: 3, Chance: 0.20, Multiplier: 0.75},
+	{Symbol: 4, Chance: 0.15, Multiplier: 1.00},
 	{Symbol: 5, Chance: 0.10, Multiplier: 2.00},
-	{Symbol: 6, Chance: 0.10, Multiplier: 5.00},
+	{Symbol: 6, Chance: 0.05, Multiplier: 5.00},
 }
 
 var symbolBucket = generateBucket()
@@ -54,8 +55,8 @@ func generateBucket() []int {
 }
 
 func fillReels(reels *[N_REELS]Reel) {
-	for i := 0; i < len(reels); i++ {
-		for j := 0; j < 3; j++ {
+	for i := 0; i < N_REELS; i++ {
+		for j := 0; j < N_SYMBOLS_PER_REEL; j++ {
 			reels[i][j] = utils.RandomItemFromInt(symbolBucket)
 		}
 	}
@@ -87,7 +88,6 @@ func getTotalWin(result *SlotV1Result) float32 {
 		}
 
 		if win {
-			fmt.Println("Win line: ", i)
 			winSymbol := result.Reels[0][currentLine[0]] // First symbol, first match
 			s := findSymbol(winSymbol)
 			totalWin += result.BetAmount * s.Multiplier
@@ -98,6 +98,7 @@ func getTotalWin(result *SlotV1Result) float32 {
 }
 
 func printReels(reels *[N_REELS]Reel) {
+	// TODO: Print dinamically
 	fmt.Println(reels[0][2], reels[1][2], reels[2][2])
 	fmt.Println(reels[0][1], reels[1][1], reels[2][1])
 	fmt.Println(reels[0][0], reels[1][0], reels[2][0])
@@ -108,14 +109,10 @@ func SlotV1Bet(betAmount float32, numberOfLines int) SlotV1Result {
 		BetAmount:     betAmount,
 		NumberOfLines: numberOfLines,
 		TotalWin:      0,
-		Reels: [N_REELS]Reel{
-			{0, 0, 0},
-			{0, 0, 0},
-			{0, 0, 0},
-		},
+		Reels:         [N_REELS]Reel{},
 	}
 	fillReels(&result.Reels)
-	printReels(&result.Reels)
+	// printReels(&result.Reels)
 	result.TotalWin = getTotalWin(&result)
 	return result
 }
