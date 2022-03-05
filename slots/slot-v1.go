@@ -1,11 +1,17 @@
 package slots
 
-import "slot-golang/utils"
+import (
+	"fmt"
+	"slot-golang/utils"
+)
+
+const N_REELS = 3
 
 type SlotV1Result struct {
-	BetAmount float32 `json:"betAmount"`
-	TotalWin  float32 `json:"totalWin"`
-	Reel      [3]Reel `json:"reel"`
+	BetAmount     float32       `json:"betAmount"`
+	TotalWin      float32       `json:"totalWin"`
+	NumberOfLines int           `json:"numberOfLines"`
+	Reels         [N_REELS]Reel `json:"reel"`
 }
 
 type Reel [3]int
@@ -27,6 +33,15 @@ var SymbolList = []Symbol{
 
 var symbolBucket = generateBucket()
 
+func findSymbol(symbol int) *Symbol {
+	for _, item := range SymbolList {
+		if symbol == item.Symbol {
+			return &item
+		}
+	}
+	return nil
+}
+
 func generateBucket() []int {
 	bucket := []int{}
 	for i := 0; i < len(SymbolList); i++ {
@@ -38,24 +53,69 @@ func generateBucket() []int {
 	return bucket
 }
 
-func fillReel(reel *Reel) {
-	for i := 0; i < 3; i++ {
-		reel[i] = utils.RandomItemFromInt(symbolBucket)
+func fillReels(reels *[N_REELS]Reel) {
+	for i := 0; i < len(reels); i++ {
+		for j := 0; j < 3; j++ {
+			reels[i][j] = utils.RandomItemFromInt(symbolBucket)
+		}
 	}
 }
 
-func SlotV1(betAmount float32) SlotV1Result {
+var LinePositions = [][3]int{
+	{1, 1, 1},
+	{0, 0, 0},
+	{2, 2, 2},
+	{0, 1, 2},
+	{2, 1, 0},
+}
+
+func getTotalWin(result *SlotV1Result) float32 {
+	var totalWin float32 = 0
+
+	for i := 0; i < result.NumberOfLines; i++ {
+		var win bool = true
+		currentLine := LinePositions[i]
+
+		for j := 1; j < len(currentLine); j++ {
+			if win {
+				symbolA := result.Reels[j][currentLine[j]]
+				symbolB := result.Reels[j-1][currentLine[j-1]]
+				if symbolA != symbolB {
+					win = false
+				}
+			}
+		}
+
+		if win {
+			fmt.Println("Win line: ", i)
+			winSymbol := result.Reels[0][currentLine[0]] // First symbol, first match
+			s := findSymbol(winSymbol)
+			totalWin += result.BetAmount * s.Multiplier
+		}
+	}
+
+	return totalWin
+}
+
+func printReels(reels *[N_REELS]Reel) {
+	fmt.Println(reels[0][2], reels[1][2], reels[2][2])
+	fmt.Println(reels[0][1], reels[1][1], reels[2][1])
+	fmt.Println(reels[0][0], reels[1][0], reels[2][0])
+}
+
+func SlotV1Bet(betAmount float32, numberOfLines int) SlotV1Result {
 	result := SlotV1Result{
-		BetAmount: betAmount,
-		TotalWin:  0,
-		Reel: [3]Reel{
+		BetAmount:     betAmount,
+		NumberOfLines: numberOfLines,
+		TotalWin:      0,
+		Reels: [N_REELS]Reel{
 			{0, 0, 0},
 			{0, 0, 0},
 			{0, 0, 0},
 		},
 	}
-	fillReel(&result.Reel[0])
-	fillReel(&result.Reel[1])
-	fillReel(&result.Reel[2])
+	fillReels(&result.Reels)
+	printReels(&result.Reels)
+	result.TotalWin = getTotalWin(&result)
 	return result
 }

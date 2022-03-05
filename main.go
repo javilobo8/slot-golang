@@ -12,7 +12,7 @@ func main() {
 
 	app.Use(middlewares.PreMiddleware)
 
-	app.Get("/test", handlers.BetHandler)
+	app.Get("/bet", handlers.BetHandler)
 
 	app.Listen(":8080")
 }
