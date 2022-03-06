@@ -2,7 +2,7 @@ package rtp
 
 import (
 	"fmt"
-	"slot-golang/slots"
+	"slot-golang/pkg/slots"
 	"time"
 )
 
@@ -12,8 +12,8 @@ const BET_AMOUNT = 1
 func calculateWithLines(lines int) {
 	fmt.Printf("-- %d lines --\n", lines)
 
-	totalBet := float32(0)
-	totalWin := float32(0)
+	totalBet := float64(0)
+	totalWin := float64(0)
 
 	start := time.Now()
 	for i := 0; i < SPINS; i++ {

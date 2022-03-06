@@ -2,15 +2,15 @@ package slots
 
 import (
 	"fmt"
-	"slot-golang/utils"
+	"slot-golang/pkg/utils"
 )
 
 const N_REELS = 3
 const N_SYMBOLS_PER_REEL = 3
 
 type SlotV1Result struct {
-	BetAmount     float32       `json:"betAmount"`
-	TotalWin      float32       `json:"totalWin"`
+	BetAmount     float64       `json:"betAmount"`
+	TotalWin      float64       `json:"totalWin"`
 	NumberOfLines int           `json:"numberOfLines"`
 	Reels         [N_REELS]Reel `json:"reel"`
 }
@@ -19,17 +19,20 @@ type Reel [N_SYMBOLS_PER_REEL]int
 
 type Symbol struct {
 	Symbol     int
-	Chance     float32
-	Multiplier float32
+	Chance     float64
+	Multiplier float64
 }
 
 var SymbolList = []Symbol{
-	{Symbol: 1, Chance: 0.30, Multiplier: 0.20},
-	{Symbol: 2, Chance: 0.30, Multiplier: 0.50},
-	{Symbol: 3, Chance: 0.20, Multiplier: 0.75},
-	{Symbol: 4, Chance: 0.15, Multiplier: 1.00},
-	{Symbol: 5, Chance: 0.10, Multiplier: 2.00},
-	{Symbol: 6, Chance: 0.05, Multiplier: 5.00},
+	{Symbol: 1, Chance: 0.01, Multiplier: 0.40},   // Combination
+	{Symbol: 2, Chance: 0.01, Multiplier: 0.80},   // Cerezas
+	{Symbol: 3, Chance: 0.01, Multiplier: 1.60},   // Naranjas
+	{Symbol: 4, Chance: 0.01, Multiplier: 2.40},   // Limones
+	{Symbol: 5, Chance: 0.01, Multiplier: 3.20},   // Fresas
+	{Symbol: 6, Chance: 0.01, Multiplier: 4.00},   // Campanas
+	{Symbol: 7, Chance: 0.01, Multiplier: 10.00},  // 7 verde
+	{Symbol: 8, Chance: 0.01, Multiplier: 20.00},  // 7 Rojo
+	{Symbol: 9, Chance: 0.01, Multiplier: 100.00}, // 7 Azul
 }
 
 var symbolBucket = generateBucket()
@@ -70,20 +73,16 @@ var LinePositions = [][3]int{
 	{2, 1, 0},
 }
 
-func getTotalWin(result *SlotV1Result) float32 {
-	var totalWin float32 = 0
+func calcTotalWinLines(result *SlotV1Result) float64 {
+	var totalWin float64 = 0
 
 	for i := 0; i < result.NumberOfLines; i++ {
 		var win bool = true
 		currentLine := LinePositions[i]
 
 		for j := 1; j < len(currentLine); j++ {
-			if win {
-				symbolA := result.Reels[j][currentLine[j]]
-				symbolB := result.Reels[j-1][currentLine[j-1]]
-				if symbolA != symbolB {
-					win = false
-				}
+			if win && result.Reels[j][currentLine[j]] != result.Reels[j-1][currentLine[j-1]] {
+				win = false
 			}
 		}
 
@@ -104,7 +103,7 @@ func printReels(reels *[N_REELS]Reel) {
 	fmt.Println(reels[0][0], reels[1][0], reels[2][0])
 }
 
-func SlotV1Bet(betAmount float32, numberOfLines int) SlotV1Result {
+func SlotV1Bet(betAmount float64, numberOfLines int) SlotV1Result {
 	result := SlotV1Result{
 		BetAmount:     betAmount,
 		NumberOfLines: numberOfLines,
@@ -113,6 +112,6 @@ func SlotV1Bet(betAmount float32, numberOfLines int) SlotV1Result {
 	}
 	fillReels(&result.Reels)
 	// printReels(&result.Reels)
-	result.TotalWin = getTotalWin(&result)
+	result.TotalWin = calcTotalWinLines(&result)
 	return result
 }
