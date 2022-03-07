@@ -7,9 +7,19 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func initializeMiddlewares(app *fiber.App) {
+	app.Use(middlewares.PreMiddleware)
+}
+
+func initializeHandlers(app *fiber.App) {
+	app.Get("/bet", handlers.BetHandler)
+}
+
 func CreateApp() {
 	app := fiber.New(fiber.Config{})
-	app.Use(middlewares.PreMiddleware)
-	app.Get("/bet", handlers.BetHandler)
+
+	initializeMiddlewares(app)
+	initializeHandlers(app)
+
 	app.Listen(":8080")
 }
